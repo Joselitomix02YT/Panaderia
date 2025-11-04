@@ -2,6 +2,26 @@ let carrito = [];
 let sesionActiva = false;
 let usuarioActual = null;
 
+// Toggle menú móvil
+document.addEventListener('DOMContentLoaded', () => {
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Cerrar menú al hacer click en un enlace
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+    }
+});
+
 // Verificar sesión al cargar la página
 async function verificarSesion() {
     try {
@@ -13,9 +33,10 @@ async function verificarSesion() {
             usuarioActual = data.username;
             actualizarUIConSesion(data.username, data.isAdmin);
             
-            // Mostrar sección "Mis Pedidos"
-            document.getElementById('mis-pedidos-link').classList.remove('hidden');
-            document.getElementById('mis-pedidos').classList.remove('hidden');
+            // Mostrar sección "Mis Pedidos" en ambos menús
+            document.getElementById('mis-pedidos-link')?.classList.remove('hidden');
+            document.getElementById('mis-pedidos-link-mobile')?.classList.remove('hidden');
+            document.getElementById('mis-pedidos')?.classList.remove('hidden');
             
             // Cargar pedidos del usuario
             cargarMisPedidos();

@@ -9,13 +9,25 @@
 <body class="bg-stone-50 text-stone-800">
     <!-- Header / Navigation -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-4">
+        <nav class="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
             <div class="flex justify-between items-center">
-                <a href="#" class="flex items-center gap-3">
-                    <img src="https://www.esperanza.mx/assets/images/logo/logo_50_anios.png" alt="Logo" class="h-12">
-                    <span class="text-2xl font-light tracking-wide">Desesperanza - Admin</span>
+                <a href="#" class="flex items-center gap-2 sm:gap-3">
+                    <img src="https://www.esperanza.mx/assets/images/logo/logo_50_anios.png" alt="Logo" class="h-8 sm:h-12">
+                    <span class="text-lg sm:text-2xl font-light tracking-wide">Desesperanza <span class="hidden sm:inline">- Admin</span></span>
                 </a>
-                <ul class="flex gap-8 list-none items-center">
+                
+                <!-- Menú móvil - Botón -->
+                <div class="flex items-center gap-2 sm:hidden">
+                    <span id="username-display" class="text-xs text-stone-600 font-light max-w-[100px] truncate"></span>
+                    <button id="mobile-menu-btn" class="p-2 text-stone-600 hover:text-stone-900">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Menú desktop -->
+                <ul class="hidden sm:flex gap-4 lg:gap-8 list-none items-center text-sm lg:text-base">
                     <li><a class="text-stone-600 hover:text-stone-900 transition-colors" href="#inicio">Inicio</a></li>
                     <li><a class="text-stone-600 hover:text-stone-900 transition-colors" href="#productos">Productos</a></li>
                     <li><a class="text-stone-600 hover:text-stone-900 transition-colors" href="#pedidos">Pedidos</a></li>
@@ -24,7 +36,22 @@
                         <span id="username-display" class="text-stone-600 font-light"></span>
                     </li>
                     <li>
-                        <button id="logoutBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                        <button id="logoutBtn" class="px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                            Cerrar sesión
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Menú móvil desplegable -->
+            <div id="mobile-menu" class="hidden sm:hidden mt-4 pb-4 border-t border-stone-200">
+                <ul class="flex flex-col gap-3 list-none pt-4">
+                    <li><a class="block text-stone-600 hover:text-stone-900 transition-colors py-2" href="#inicio">Inicio</a></li>
+                    <li><a class="block text-stone-600 hover:text-stone-900 transition-colors py-2" href="#productos">Productos</a></li>
+                    <li><a class="block text-stone-600 hover:text-stone-900 transition-colors py-2" href="#pedidos">Pedidos</a></li>
+                    <li><a class="block text-stone-600 hover:text-stone-900 transition-colors py-2" href="#contacto">Gestión</a></li>
+                    <li>
+                        <button id="logoutBtn" class="w-full text-left px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
                             Cerrar sesión
                         </button>
                     </li>
@@ -34,44 +61,44 @@
     </header>
 
     <!-- Hero Section -->
-    <section id="inicio" class="h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100">
-        <div class="text-center px-6 max-w-3xl">
-            <h1 class="text-7xl font-light mb-6 tracking-tight">Panel de Administración</h1>
-            <p class="text-2xl text-stone-600 mb-8 font-light">Gestiona tus productos y pedidos fácilmente</p>
-            <div class="flex gap-4 justify-center">
-                <a href="#productos" class="inline-block px-8 py-3 bg-stone-800 text-white rounded-full hover:bg-stone-700 transition-colors">Ver Productos</a>
-                <a href="#pedidos" class="inline-block px-8 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">Ver Pedidos</a>
+    <section id="inicio" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100 py-20">
+        <div class="text-center px-4 sm:px-6 max-w-3xl">
+            <h1 class="text-4xl sm:text-5xl md:text-7xl font-light mb-4 sm:mb-6 tracking-tight">Panel de Administración</h1>
+            <p class="text-lg sm:text-xl md:text-2xl text-stone-600 mb-6 sm:mb-8 font-light">Gestiona tus productos y pedidos fácilmente</p>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                <a href="#productos" class="inline-block px-6 sm:px-8 py-2 sm:py-3 bg-stone-800 text-white rounded-full hover:bg-stone-700 transition-colors text-sm sm:text-base">Ver Productos</a>
+                <a href="#pedidos" class="inline-block px-6 sm:px-8 py-2 sm:py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors text-sm sm:text-base">Ver Pedidos</a>
             </div>
         </div>
     </section>
 
     <!-- Productos Section -->
-    <section id="productos" class="container mx-auto px-6 py-20">
-        <h2 class="text-4xl font-light text-center mb-16">Gestión de Productos</h2>
+    <section id="productos" class="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <h2 class="text-3xl sm:text-4xl font-light text-center mb-8 sm:mb-16">Gestión de Productos</h2>
         
-        <div id="productos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
             <!-- Los productos se cargarán dinámicamente aquí -->
         </div>
     </section>
 
     <!-- SECCIÓN DE PEDIDOS -->
-    <section id="pedidos" class="container mx-auto px-6 py-20 bg-white">
+    <section id="pedidos" class="container mx-auto px-4 sm:px-6 py-12 sm:py-20 bg-white">
         <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-4xl font-light">Pedidos de Clientes</h2>
-                <button onclick="cargarPedidos()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h2 class="text-3xl sm:text-4xl font-light">Pedidos de Clientes</h2>
+                <button onclick="cargarPedidos()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm w-full sm:w-auto">
                     🔄 Actualizar
                 </button>
             </div>
 
             <!-- Filtros -->
-            <div class="mb-6 flex gap-4">
+            <div class="mb-6 flex flex-col sm:flex-row gap-4">
                 <input 
                     type="text" 
                     id="filtro-usuario" 
                     placeholder="Buscar por usuario..." 
-                    class="flex-1 px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:border-stone-600">
-                <select id="filtro-fecha" class="px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:border-stone-600">
+                    class="flex-1 px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:border-stone-600 text-sm">
+                <select id="filtro-fecha" class="px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:border-stone-600 text-sm">
                     <option value="">Todas las fechas</option>
                     <option value="hoy">Hoy</option>
                     <option value="semana">Esta semana</option>
@@ -80,7 +107,7 @@
             </div>
 
             <!-- Resumen estadístico -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
                 <div class="bg-blue-50 p-4 rounded-lg">
                     <p class="text-sm text-blue-600">Total Pedidos</p>
                     <p id="total-pedidos" class="text-2xl font-light">0</p>
@@ -107,14 +134,14 @@
     </section>
 
     <!-- Nosotros Section -->
-    <section id="nosotros" class="bg-stone-800 text-white py-20">
-        <div class="container mx-auto px-6">
+    <section id="nosotros" class="bg-stone-800 text-white py-12 sm:py-20">
+        <div class="container mx-auto px-4 sm:px-6">
             <div class="max-w-3xl mx-auto text-center">
-                <h2 class="text-4xl font-light mb-8">Nuestra Historia</h2>
-                <p class="text-lg font-light leading-relaxed mb-6">
+                <h2 class="text-3xl sm:text-4xl font-light mb-6 sm:mb-8">Nuestra Historia</h2>
+                <p class="text-base sm:text-lg font-light leading-relaxed mb-4 sm:mb-6">
                     Desde 1975, hemos dedicado nuestra vida al arte del pan. Cada pieza se elabora con ingredientes seleccionados y técnicas tradicionales transmitidas de generación en generación.
                 </p>
-                <p class="text-lg font-light leading-relaxed">
+                <p class="text-base sm:text-lg font-light leading-relaxed">
                     Nuestro compromiso es ofrecer productos frescos, naturales y deliciosos que lleven sabor y tradición a tu mesa cada día.
                 </p>
             </div>
@@ -122,10 +149,10 @@
     </section>
 
     <!-- Contacto Section -->
-    <section id="contacto" class="container mx-auto px-6 py-20">
-        <h2 class="text-4xl font-light text-center mb-16">Gestión de Inventario</h2>
+    <section id="contacto" class="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <h2 class="text-3xl sm:text-4xl font-light text-center mb-8 sm:mb-16">Gestión de Inventario</h2>
         
-        <div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-8 sm:gap-12 max-w-5xl mx-auto">
             <!-- Información de contacto -->
             <div class="space-y-6">
                 <div>

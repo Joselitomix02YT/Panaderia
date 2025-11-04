@@ -1,5 +1,25 @@
 let isAdmin = false;
 
+// Toggle menú móvil
+document.addEventListener('DOMContentLoaded', () => {
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Cerrar menú al hacer click en un enlace
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+    }
+});
+
 // Verificar autenticación y obtener datos del usuario al cargar la página
 async function verificarAuth() {
     try {
@@ -13,7 +33,11 @@ async function verificarAuth() {
         const data = await response.json();
         isAdmin = data.isAdmin;
         
-        document.getElementById('username-display').textContent = `Hola, ${data.usuario}`;
+        // Actualizar todos los displays de username (desktop y mobile)
+        const usernameDisplays = document.querySelectorAll('#username-display');
+        usernameDisplays.forEach(display => {
+            display.textContent = `Hola, ${data.usuario}`;
+        });
         
     } catch (error) {
         console.error('Error:', error);
