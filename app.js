@@ -1,3 +1,8 @@
+function sanitizar(input){
+    if(!input) return '';
+    return input.replace(/<[^>]*>?/gm,'').replace(/<\?php.*?\?>/gs,'');
+}
+
 require('dotenv').config()
 const express = require('express');
 const session = require('express-session')
@@ -102,6 +107,21 @@ app.get('/index2.html', requireAuth, requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index2.html'))
 })
 
+// NUEVA RUTA: Endpoint para verificar sesión
+app.get('/api/sesion', (req, res) => {
+  if (req.session && req.session.userId) {
+    res.json({
+      loggedIn: true,
+      username: req.session.username,
+      isAdmin: req.session.isAdmin || false
+    })
+  } else {
+    res.json({
+      loggedIn: false
+    })
+  }
+})
+
 // Servir archivos estáticos
 app.use(express.static('public'))
 
@@ -125,17 +145,21 @@ app.post('/api/productos', async (req, res) => {
       return res.status(403).json({ error: 'No tienes permisos de administrador' })
     }
 
-    const { nombre, descripcion, precio, cantidad, imagen_url } = req.body
-    
-    if (!nombre || !precio || cantidad === undefined) {
+    const nombre = sanitizar((req.body.nombre || '').toString().trim())
+    const descripcion = sanitizar((req.body.descripcion || '').toString().trim())
+    const precio = parseFloat(sanitizar(String(req.body.precio || '0')).replace(',', '.')) || 0
+    const cantidad = parseInt(sanitizar(String(req.body.cantidad || '0'))) || 0
+    const imagen_url = sanitizar((req.body.imagen_url || '').toString().trim()) || null
+
+    if (!nombre || !precio || Number.isNaN(cantidad)) {
       return res.status(400).json({ error: 'Nombre, precio y cantidad son requeridos' })
     }
-    
+
     const [result] = await pool.query(
       'INSERT INTO pan (nombre, descripcion, precio, cantidad, imagen_url) VALUES (?, ?, ?, ?, ?)',
-      [nombre, descripcion || null, parseFloat(precio), parseInt(cantidad), imagen_url || null]
+      [nombre, descripcion || null, precio, cantidad, imagen_url || null]
     )
-    
+
     res.json({ success: true, mensaje: 'Pan agregado correctamente', id: result.insertId })
   } catch (error) {
     console.error('Error al insertar producto:', error)
@@ -151,15 +175,19 @@ app.put('/api/productos/:id', async (req, res) => {
     }
 
     const { id } = req.params
-    const { nombre, descripcion, precio, cantidad, imagen_url } = req.body
-    
+    const nombre = sanitizar((req.body.nombre || '').toString().trim())
+    const descripcion = sanitizar((req.body.descripcion || '').toString().trim())
+    const precio = parseFloat(sanitizar(String(req.body.precio || '0')).replace(',', '.')) || 0
+    const cantidad = parseInt(sanitizar(String(req.body.cantidad || '0'))) || 0
+    const imagen_url = sanitizar((req.body.imagen_url || '').toString().trim()) || null
+
     await pool.query(
       'UPDATE pan SET nombre = ?, descripcion = ?, precio = ?, cantidad = ?, imagen_url = ? WHERE id = ?',
-      [nombre, descripcion || null, parseFloat(precio), parseInt(cantidad), imagen_url || null, id]
+      [nombre, descripcion || null, precio, cantidad, imagen_url || null, parseInt(sanitizar(String(id)))]
     )
-    
+
     res.json({ success: true, mensaje: 'Producto actualizado correctamente' })
-    
+
   } catch (error) {
     console.error('Error al actualizar producto:', error)
     res.status(500).json({ error: 'Error al actualizar el producto' })
@@ -172,28 +200,27 @@ app.delete('/api/productos/:id', async (req, res) => {
     if (!req.session.userId) {
       return res.status(401).json({ error: 'Debes iniciar sesión' })
     }
-    
+
     if (!req.session.isAdmin) {
       return res.status(403).json({ error: 'No tienes permisos de administrador' })
     }
 
-    const { id } = req.params
-    
+    const id = parseInt(sanitizar(String(req.params.id)))
     const [producto] = await pool.query('SELECT * FROM pan WHERE id = ?', [id])
-    
+
     if (producto.length === 0) {
       return res.status(404).json({ error: 'Producto no encontrado' })
     }
-    
+
     await pool.query('DELETE FROM pan WHERE id = ?', [id])
-    
+
     console.log(`[ADMIN: ${req.session.username}] Eliminó producto ID: ${id} - ${producto[0].nombre}`)
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       mensaje: 'Producto eliminado correctamente'
     })
-    
+
   } catch (error) {
     console.error('Error al eliminar producto:', error)
     res.status(500).json({ error: 'Error al eliminar el producto' })
@@ -204,11 +231,27 @@ app.delete('/api/productos/:id', async (req, res) => {
 app.post('/api/carrito/guardar', async (req, res) => {
   let connection;
   try {
-    const { productos } = req.body
-    
-    if (!productos || productos.length === 0) {
+    // Verificar que el usuario esté autenticado
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Debes iniciar sesión para realizar un pedido' });
+    }
+
+    const productosRaw = req.body.productos
+    if (!productosRaw || !Array.isArray(productosRaw) || productosRaw.length === 0) {
       return res.status(400).json({ error: 'El carrito está vacío' })
     }
+
+    // Obtener información del usuario
+    const usuarioId = req.session.userId;
+    const username = req.session.username;
+
+    // Sanitizar y normalizar productos del carrito
+    const productos = productosRaw.map(p => ({
+      id: parseInt(sanitizar(String(p.id))),
+      nombre: sanitizar((p.nombre || '').toString()),
+      precio: parseFloat(sanitizar(String(p.precio || '0')).replace(',', '.')) || 0,
+      cantidad: parseInt(sanitizar(String(p.cantidad || '0'))) || 0
+    }))
 
     connection = await pool.getConnection();
     await connection.beginTransaction();
@@ -229,23 +272,27 @@ app.post('/api/carrito/guardar', async (req, res) => {
         throw new Error(`Stock insuficiente para ${producto.nombre}. Disponible: ${cantidadDisponible}, Solicitado: ${producto.cantidad}`);
       }
 
+      // Insertar pedido con información del usuario
       await connection.query(
-        'INSERT INTO pedidos (nombre, precio, cantidad) VALUES (?, ?, ?)',
+        'INSERT INTO pedidos (nombre, precio, cantidad, usuario_id, username) VALUES (?, ?, ?, ?, ?)',
         [
           producto.nombre,
-          parseFloat(producto.precio),
-          parseInt(producto.cantidad)
+          producto.precio,
+          producto.cantidad,
+          usuarioId,
+          username
         ]
       );
 
+      // Actualizar stock
       await connection.query(
         'UPDATE pan SET cantidad = cantidad - ? WHERE id = ?',
-        [parseInt(producto.cantidad), producto.id]
+        [producto.cantidad, producto.id]
       );
     }
 
     await connection.commit();
-    console.log(`[PEDIDO] Se guardó pedido con ${productos.length} productos y se actualizó el stock`);
+    console.log(`[PEDIDO] Usuario: ${username} (ID: ${usuarioId}) - Guardó pedido con ${productos.length} productos`);
 
     res.json({
       success: true,
@@ -257,8 +304,8 @@ app.post('/api/carrito/guardar', async (req, res) => {
       await connection.rollback();
     }
     console.error('Error al guardar carrito:', error);
-    res.status(500).json({ 
-      error: error.message || 'Error al guardar el pedido' 
+    res.status(500).json({
+      error: error.message || 'Error al guardar el pedido'
     })
   } finally {
     if (connection) {
@@ -267,19 +314,13 @@ app.post('/api/carrito/guardar', async (req, res) => {
   }
 })
 
-// Endpoint para registro de nuevos usuarios (UNIFICADO - ELIMINÉ LA DUPLICACIÓN)
+// Endpoint para registro de nuevos usuarios
 app.post('/registro', async (req, res) => {
   try {
-    const { username, password } = req.body
-    
-    console.log('[REGISTRO] Datos recibidos:', { 
-      username, 
-      passwordLength: password?.length,
-      passwordRaw: password // TEMPORAL: para debug
-    })
-    
+    const username = sanitizar((req.body.username || '').toString().trim())
+    const password = req.body.password // conservar password tal cual para bcrypt
     if (!username || !password) {
-      return res.status(400).json({ error: 'Usuario y contraseña son requeridos' })
+      return res.status(400).json({ error: 'Usuario y contraseña son requeridos o hay un error de escritura' })
     }
 
     if (password.length < 6) {
@@ -297,104 +338,92 @@ app.post('/registro', async (req, res) => {
       return res.status(400).json({ error: 'El usuario ya existe' })
     }
 
-    // Hashear la contraseña
+    // Hashear la contraseña (sin sanitizarla)
     const hashedPassword = await bcrypt.hash(password, 10)
-    
-    console.log('[REGISTRO] Hash generado:', {
-      original: password, // TEMPORAL: para debug
-      hash: hashedPassword.substring(0, 30) + '...',
-      hashLength: hashedPassword.length
-    })
-    
+
     // Insertar nuevo usuario (admin = false por defecto)
     const [result] = await pool.query(
       'INSERT INTO usuario (username, password, admin) VALUES (?, ?, ?)',
       [username, hashedPassword, 0]
     )
-    
+
     console.log(`[REGISTRO] ✅ Usuario registrado exitosamente: ${username} (ID: ${result.insertId})`)
-    
-    // Verificar que se guardó correctamente
-    const [verificacion] = await pool.query(
-      'SELECT id, username, password, admin FROM usuario WHERE id = ?',
-      [result.insertId]
-    )
-    
-    console.log('[REGISTRO] Verificación en DB:', {
-      id: verificacion[0].id,
-      username: verificacion[0].username,
-      passwordHash: verificacion[0].password.substring(0, 30) + '...',
-      admin: verificacion[0].admin
+
+    res.json({
+      success: true,
+      mensaje: 'Usuario registrado correctamente. Ya puedes iniciar sesión.'
     })
-    
-    res.json({ 
-      success: true, 
-      mensaje: 'Usuario registrado correctamente. Ya puedes iniciar sesión.' 
-    })
-    
+
   } catch (error) {
     console.error('[REGISTRO] ❌ Error en registro:', error)
     res.status(500).json({ error: 'Error al registrar usuario: ' + error.message })
   }
 })
 
-// Endpoint de login
+// Endpoint de login (COMPATIBLE CON CONTRASEÑAS PLANAS Y BCRYPT)
 app.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body
-    
-    console.log('[LOGIN] Datos recibidos:', { 
-      username, 
-      passwordLength: password?.length,
-      passwordRaw: password // TEMPORAL: para debug
-    })
-    
+    const username = sanitizar((req.body.username || '').toString().trim())
+    const password = req.body.password // comparar con bcrypt sin sanitizar
+
+    if (!username || !password) {
+      return res.status(400).json({ mensaje: 'Usuario y contraseña son requeridos' })
+    }
+
     const [rows] = await pool.execute(
-      'SELECT * FROM usuario WHERE username = ?', 
+      'SELECT * FROM usuario WHERE username = ?',
       [username]
     )
-    
+
     if (rows.length === 0) {
       console.log('[LOGIN] ❌ Usuario no encontrado:', username)
       return res.status(401).json({ mensaje: 'Usuario o contraseña incorrecta' })
     }
-    
+
     const user = rows[0]
-    
-    console.log('[LOGIN] Usuario encontrado en DB:', {
-      id: user.id,
-      username: user.username,
-      admin: user.admin,
-      passwordHashStart: user.password?.substring(0, 30) + '...',
-      passwordHashLength: user.password?.length
-    })
-    
-    console.log('[LOGIN] Comparando:', {
-      passwordIngresada: password,
-      hashEnDB: user.password.substring(0, 30) + '...'
-    })
-    
-    const passwordMatch = await bcrypt.compare(password, user.password)
-    
-    console.log('[LOGIN] Resultado de bcrypt.compare:', passwordMatch)
-    
+    let passwordMatch = false
+
+    // Verificar si la contraseña está hasheada con bcrypt (empieza con $2b$ o $2a$ o $2y$)
+    if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$') || user.password.startsWith('$2y$')) {
+      // Contraseña hasheada - usar bcrypt
+      passwordMatch = await bcrypt.compare(password, user.password)
+      console.log('[LOGIN] Verificación bcrypt:', passwordMatch)
+    } else {
+      // Contraseña en texto plano - comparación directa
+      passwordMatch = (password === user.password)
+      console.log('[LOGIN] Verificación texto plano:', passwordMatch)
+      
+      // OPCIONAL: Actualizar automáticamente a bcrypt después del login exitoso
+      if (passwordMatch) {
+        const hashedPassword = await bcrypt.hash(password, 10)
+        await pool.query(
+          'UPDATE usuario SET password = ? WHERE id = ?',
+          [hashedPassword, user.id]
+        )
+        console.log(`[LOGIN] ✅ Contraseña actualizada a bcrypt para usuario: ${username}`)
+      }
+    }
+
     if (!passwordMatch) {
       console.log('[LOGIN] ❌ Contraseña incorrecta para:', username)
       return res.status(401).json({ mensaje: 'Usuario o contraseña incorrecta' })
     }
-    
+
     req.session.userId = user.id
     req.session.username = user.username
     req.session.isAdmin = Boolean(user.admin)
-    
+
     console.log(`[LOGIN] ✅ Login exitoso - Usuario: ${user.username}, Admin: ${req.session.isAdmin}`)
-    
-    res.json({ 
+
+    // Redirigir según tipo de usuario
+    const redirect = req.session.isAdmin ? '/index2.html' : '/'
+
+    res.json({
       mensaje: 'Has iniciado sesión correctamente',
-      redirect: '/index2.html',
+      redirect: redirect,
       isAdmin: req.session.isAdmin
     })
-    
+
   } catch (error) {
     console.error('[LOGIN] ❌ Error en login:', error)
     res.status(500).json({ mensaje: 'Error al procesar el inicio de sesión' })
@@ -418,6 +447,43 @@ app.get('/perfil', requireAuth, (req, res) => {
     isAdmin: req.session.isAdmin 
   })
 })
+
+// Ver pedidos del usuario actual
+app.get('/api/mis-pedidos', requireAuth, async (req, res) => {
+  try {
+    const [pedidos] = await pool.query(
+      'SELECT * FROM pedidos WHERE usuario_id = ? ORDER BY id DESC',
+      [req.session.userId]
+    );
+    res.json(pedidos);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Error al obtener pedidos' });
+  }
+});
+
+// Ver TODOS los pedidos (SOLO ADMIN)
+app.get('/api/pedidos', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const [pedidos] = await pool.query(
+      `SELECT 
+        p.id,
+        p.nombre,
+        p.precio,
+        p.cantidad,
+        p.usuario_id,
+        p.username,
+        p.fecha_pedido,
+        COALESCE(p.username, 'Invitado') as usuario_nombre
+      FROM pedidos p 
+      ORDER BY p.fecha_pedido DESC, p.id DESC`
+    );
+    res.json(pedidos);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Error al obtener pedidos' });
+  }
+});
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
