@@ -318,7 +318,8 @@ async function cargarProductos() {
     }
 }
 
-document.getElementById('logoutBtn').addEventListener('click', async function(e) {
+// Función para cerrar sesión (usando delegación de eventos)
+async function cerrarSesion(e) {
     e.preventDefault();
     if (!confirm('¿Cerrar sesión?')) return;
     
@@ -337,6 +338,13 @@ document.getElementById('logoutBtn').addEventListener('click', async function(e)
     } catch (error) {
         console.error('Error:', error);
         alert('Error al conectar con el servidor');
+    }
+}
+
+// Usar delegación de eventos para manejar clicks en botones de logout (desktop y móvil)
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'logoutBtn') {
+        cerrarSesion(e);
     }
 });
 
