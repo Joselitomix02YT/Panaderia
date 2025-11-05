@@ -324,22 +324,28 @@ document.getElementById('registroForm').addEventListener('submit', async functio
 
 // Función para agregar producto al carrito CON VALIDACIÓN DE STOCK
 function agregarAlCarrito(id, nombre, precio, imagen_url, cantidadDisponible) {
-    console.log('🛒 agregarAlCarrito llamada:', {id, nombre, precio, cantidadDisponible});
-    console.log('📦 Carrito actual:', carrito);
+    console.log('🛒 ===== INICIO agregarAlCarrito =====');
+    console.log('🛒 Parámetros recibidos:', {id, nombre, precio, imagen_url, cantidadDisponible});
+    console.log('� Tipo de ID:', typeof id, '- Valor:', id);
+    console.log('📦 Carrito actual (length):', carrito.length);
+    console.log('�📦 Carrito actual (contenido):', JSON.stringify(carrito, null, 2));
     
     const productoExistente = carrito.find(item => item.id === id);
+    console.log('🔍 Producto existente encontrado:', productoExistente);
     
     if (productoExistente) {
         // Verificar si hay stock suficiente antes de incrementar
         if (productoExistente.cantidad >= cantidadDisponible) {
+            console.warn('⚠️ Stock insuficiente para incrementar');
             alert(`No hay más stock disponible de ${nombre}. Solo quedan ${cantidadDisponible} unidades.`);
             return;
         }
         productoExistente.cantidad++;
-        console.log('✅ Producto incrementado:', productoExistente);
+        console.log('✅ Producto incrementado:', JSON.stringify(productoExistente, null, 2));
     } else {
         // Verificar stock disponible antes de agregar
         if (cantidadDisponible <= 0) {
+            console.warn('⚠️ Producto agotado');
             alert(`${nombre} está agotado.`);
             return;
         }
@@ -352,13 +358,19 @@ function agregarAlCarrito(id, nombre, precio, imagen_url, cantidadDisponible) {
             cantidad: 1,
             cantidadDisponible: cantidadDisponible
         };
+        
+        console.log('➕ Agregando nuevo producto:', JSON.stringify(nuevoProducto, null, 2));
         carrito.push(nuevoProducto);
-        console.log('✅ Producto agregado:', nuevoProducto);
+        console.log('✅ Producto agregado. Nuevo length del carrito:', carrito.length);
     }
     
-    console.log('📦 Carrito después de agregar:', carrito);
+    console.log('📦 Carrito FINAL (length):', carrito.length);
+    console.log('📦 Carrito FINAL (contenido):', JSON.stringify(carrito, null, 2));
+    console.log('🛒 ===== Llamando actualizarCarrito =====');
     actualizarCarrito();
+    console.log('🛒 ===== Mostrando notificación =====');
     mostrarNotificacion(`${nombre} agregado al carrito`);
+    console.log('🛒 ===== FIN agregarAlCarrito =====');
 }
 
 // Función para actualizar el carrito visual
@@ -521,17 +533,25 @@ document.addEventListener('click', function(e) {
     
     // Delegar evento para botones de agregar al carrito
     if (e.target.classList.contains('btn-agregar-carrito') && !e.target.disabled) {
+        e.preventDefault(); // Prevenir comportamiento por defecto
+        e.stopPropagation(); // Detener propagación
+        
         const btn = e.target;
+        console.log('🎯 Click detectado en botón agregar');
+        console.log('📊 Dataset completo del botón:', btn.dataset);
+        
         const id = parseInt(btn.dataset.id);
         const nombre = btn.dataset.nombre;
         const precio = parseFloat(btn.dataset.precio);
         const imagen_url = btn.dataset.imagen;
         const cantidadDisponible = parseInt(btn.dataset.stock);
         
-        console.log('🎯 Click detectado en botón agregar');
-        console.log('📊 Datos del botón:', {id, nombre, precio, imagen_url, cantidadDisponible});
+        console.log('📊 Datos parseados:', {id, nombre, precio, imagen_url, cantidadDisponible});
+        console.log('📦 Carrito ANTES de agregar:', JSON.parse(JSON.stringify(carrito)));
         
         agregarAlCarrito(id, nombre, precio, imagen_url, cantidadDisponible);
+        
+        console.log('📦 Carrito DESPUÉS de agregar:', JSON.parse(JSON.stringify(carrito)));
     }
 });
 
