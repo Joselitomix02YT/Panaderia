@@ -645,3 +645,7 @@ document.getElementById('loginForm')?.addEventListener('submit', function(event)
         loginButton.classList.remove('opacity-50', 'cursor-not-allowed');
     });
 });
+
+// Exponer funciones globalmente para que funcionen con onclick en HTML
+window.agregarAlCarrito = agregarAlCarrito;
+window.eliminarDelCarrito = eliminarDelCarrito;
