@@ -324,6 +324,9 @@ document.getElementById('registroForm').addEventListener('submit', async functio
 
 // Función para agregar producto al carrito CON VALIDACIÓN DE STOCK
 function agregarAlCarrito(id, nombre, precio, imagen_url, cantidadDisponible) {
+    console.log('🛒 agregarAlCarrito llamada:', {id, nombre, precio, cantidadDisponible});
+    console.log('📦 Carrito actual:', carrito);
+    
     const productoExistente = carrito.find(item => item.id === id);
     
     if (productoExistente) {
@@ -333,6 +336,7 @@ function agregarAlCarrito(id, nombre, precio, imagen_url, cantidadDisponible) {
             return;
         }
         productoExistente.cantidad++;
+        console.log('✅ Producto incrementado:', productoExistente);
     } else {
         // Verificar stock disponible antes de agregar
         if (cantidadDisponible <= 0) {
@@ -340,16 +344,19 @@ function agregarAlCarrito(id, nombre, precio, imagen_url, cantidadDisponible) {
             return;
         }
         
-        carrito.push({
+        const nuevoProducto = {
             id: id,
             nombre: nombre,
             precio: parseFloat(precio),
             imagen_url: imagen_url,
             cantidad: 1,
             cantidadDisponible: cantidadDisponible
-        });
+        };
+        carrito.push(nuevoProducto);
+        console.log('✅ Producto agregado:', nuevoProducto);
     }
     
+    console.log('📦 Carrito después de agregar:', carrito);
     actualizarCarrito();
     mostrarNotificacion(`${nombre} agregado al carrito`);
 }
