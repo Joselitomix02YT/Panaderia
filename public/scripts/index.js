@@ -375,8 +375,10 @@ function agregarAlCarrito(id, nombre, precio, imagen_url, cantidadDisponible) {
 
 // Función para actualizar el carrito visual
 function actualizarCarrito() {
+    console.log('🔄 Actualizando carrito visual...');
+    
     const carritoItems = document.getElementById('carrito-items');
-    const carritoCount = document.getElementById('carrito-count');
+    const carritoCountBadges = document.querySelectorAll('.carrito-count-badge'); // Usar clase en vez de ID
     const totalProductos = document.getElementById('total-productos');
     const totalPrecio = document.getElementById('total-precio');
     
@@ -384,19 +386,28 @@ function actualizarCarrito() {
     const cantidadTotal = carrito.reduce((sum, item) => sum + item.cantidad, 0);
     const precioTotal = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
     
-    // Actualizar badge del carrito
-    if (cantidadTotal > 0) {
-        carritoCount.textContent = cantidadTotal;
-        carritoCount.classList.remove('hidden');
-    } else {
-        carritoCount.classList.add('hidden');
-    }
+    console.log('📊 Totales calculados:', {cantidadTotal, precioTotal});
+    
+    // Actualizar TODOS los badges del carrito (desktop y móvil)
+    carritoCountBadges.forEach(badge => {
+        if (cantidadTotal > 0) {
+            badge.textContent = cantidadTotal;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    });
     
     // Actualizar totales
-    totalProductos.textContent = cantidadTotal;
-    totalPrecio.textContent = `$${precioTotal.toFixed(2)}`;
+    if (totalProductos) totalProductos.textContent = cantidadTotal;
+    if (totalPrecio) totalPrecio.textContent = `$${precioTotal.toFixed(2)}`;
     
     // Actualizar lista de items
+    if (!carritoItems) {
+        console.warn('⚠️ Elemento carrito-items no encontrado');
+        return;
+    }
+    
     if (carrito.length === 0) {
         carritoItems.innerHTML = '<p class="text-center text-stone-600">El carrito está vacío</p>';
     } else {
@@ -420,6 +431,8 @@ function actualizarCarrito() {
             </div>
         `).join('');
     }
+    
+    console.log('✅ Carrito visual actualizado');
 }
 
 // Función para cambiar cantidad CON VALIDACIÓN DE STOCK
