@@ -518,6 +518,21 @@ document.addEventListener('click', function(e) {
         document.getElementById('carrito-panel').classList.remove('translate-x-full');
         document.getElementById('carrito-overlay').classList.remove('hidden');
     }
+    
+    // Delegar evento para botones de agregar al carrito
+    if (e.target.classList.contains('btn-agregar-carrito') && !e.target.disabled) {
+        const btn = e.target;
+        const id = parseInt(btn.dataset.id);
+        const nombre = btn.dataset.nombre;
+        const precio = parseFloat(btn.dataset.precio);
+        const imagen_url = btn.dataset.imagen;
+        const cantidadDisponible = parseInt(btn.dataset.stock);
+        
+        console.log('🎯 Click detectado en botón agregar');
+        console.log('📊 Datos del botón:', {id, nombre, precio, imagen_url, cantidadDisponible});
+        
+        agregarAlCarrito(id, nombre, precio, imagen_url, cantidadDisponible);
+    }
 });
 
 function cerrarCarritoPanel() {
@@ -572,8 +587,12 @@ async function cargarProductos() {
                     </div>
                     
                     <button 
-                        onclick='agregarAlCarrito(${producto.id}, "${producto.nombre.replace(/'/g, "\\'")}", ${producto.precio}, "${producto.imagen_url || ''}", ${cantidadDisponible})' 
-                        class="w-full px-4 py-2 text-sm rounded-lg transition-colors ${agotado ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white"
+                        class="btn-agregar-carrito w-full px-4 py-2 text-sm rounded-lg transition-colors ${agotado ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white"
+                        data-id="${producto.id}"
+                        data-nombre="${producto.nombre.replace(/"/g, '&quot;')}"
+                        data-precio="${producto.precio}"
+                        data-imagen="${producto.imagen_url || ''}"
+                        data-stock="${cantidadDisponible}"
                         ${agotado ? 'disabled' : ''}>
                         ${agotado ? '❌ Agotado' : '🛒 Agregar al Carrito'}
                     </button>
