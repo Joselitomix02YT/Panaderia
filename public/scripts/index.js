@@ -505,9 +505,12 @@ function mostrarNotificacion(mensaje) {
 }
 
 // Abrir/Cerrar panel del carrito
-document.getElementById('carritoBtn').addEventListener('click', function() {
-    document.getElementById('carrito-panel').classList.remove('translate-x-full');
-    document.getElementById('carrito-overlay').classList.remove('hidden');
+// Abrir carrito (delegación de eventos para todos los botones con clase carrito-btn-toggle)
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.carrito-btn-toggle')) {
+        document.getElementById('carrito-panel').classList.remove('translate-x-full');
+        document.getElementById('carrito-overlay').classList.remove('hidden');
+    }
 });
 
 function cerrarCarritoPanel() {
