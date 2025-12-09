@@ -130,7 +130,7 @@ async function cargarMisPedidos() {
                             </div>
                         </div>
                         <button class="ticket-btn ml-4 text-blue-600 hover:text-blue-800 text-xl" 
-                                data-pedido="${item.id_pedido}"
+                                data-pedido="${pedidosArray.length - index}"
                                 data-nombre="${item.nombre}"
                                 data-precio="${item.precio}"
                                 data-cantidad="${item.cantidad}"
