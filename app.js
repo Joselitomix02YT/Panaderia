@@ -206,6 +206,7 @@ app.post('/api/usuario/agregar-fondos', async (req, res) => {
     const cantidadNumerica = parseFloat(cantidad);
     
     console.log('   Cantidad recibida:', cantidad);
+    
     console.log('   Cantidad numérica:', cantidadNumerica);
 
     if (isNaN(cantidadNumerica) || cantidadNumerica <= 0) {
