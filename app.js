@@ -530,6 +530,20 @@ app.get('/api/pedidos', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+//obtener parametros para los fondos en la cuenta
+app.get('/api/producto/:fondos', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT * FROM usuario WHERE fondos = ?',
+            [req.params.fondos]
+        );
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Error en la consulta' });
+    }
+    });
+
 const PORT = process.env.PORT || 55194
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`)

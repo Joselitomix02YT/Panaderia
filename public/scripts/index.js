@@ -267,18 +267,7 @@ function actualizarUIConSesion(username, isAdmin) {
         `;
     }
 
-    app.get('/api/producto/:id', async (req, res) => {
-    try {
-        const [rows] = await pool.query(
-            'SELECT * FROM usuario WHERE fondos = ?',
-            [req.params.fondos]
-        );
-        res.json(rows[0]);
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'Error en la consulta' });
-    }
-    });
+    
     // Ocultar formulario de login
     if (loginContainer) {
         loginContainer.innerHTML = `
@@ -288,9 +277,8 @@ function actualizarUIConSesion(username, isAdmin) {
                 <a href="#mis-pedidos" class="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-3">
                     📦 Ver Mis Pedidos
                 </a>
-
                 <div class="my-4 border-t border-stone-300" style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                    Fondos disponibles: ${req.params.fondos} MXN
+                    Fondos disponibles: ${obtenerFondos()} MXN
                     <button onclick="AgregarFondos()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                     Agregar Fondos
                     </button>
@@ -303,6 +291,17 @@ function actualizarUIConSesion(username, isAdmin) {
     // Agregar evento al botón de cerrar sesión (desktop y móvil)
     document.getElementById('logout-btn')?.addEventListener('click', cerrarSesion);
     document.getElementById('logout-btn-mobile')?.addEventListener('click', cerrarSesion);
+}
+
+async function obtenerFondos() {
+    try {
+        const response = await fetch(`/api/producto/fondos`);
+        const producto = await response.json();
+        console.log(producto);
+        return producto;
+    } catch (error) {
+        console.error('Error al obtener producto:', error);
+    }
 }
 
 // Función para cerrar sesión
