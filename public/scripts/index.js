@@ -129,19 +129,22 @@ async function cargarMisPedidos() {
                                 <p class="text-sm text-stone-600">Subtotal: $${(parseFloat(item.precio) * parseInt(item.cantidad)).toFixed(2)}</p>
                             </div>
                         </div>
-                        <button class="ticket-btn ml-4 text-blue-600 hover:text-blue-800 text-xl" 
-                                data-pedido="${pedidosArray.length - index}"
-                                data-nombre="${item.nombre}"
-                                data-precio="${item.precio}"
-                                data-cantidad="${item.cantidad}"
-                                data-usuario="${usuarioActual}"
-                                title="Mostrar ticket">
-                            Mostrar Ticket🧾
-                        </button>
-                        <div id="area-ticket" style="display: none; border: 1px solid #ccc; padding: 20px; width: 300px; font-family: monospace;">
-                        
-                        </div>
                     `).join('')}
+                </div>
+                
+                <div class="mt-4 flex justify-end">
+                    <button class="ticket-btn px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors" 
+                            data-pedido-index="${index}"
+                            data-pedido-numero="${pedidosArray.length - index}"
+                            data-fecha="${grupo.fecha}"
+                            data-total="${grupo.total.toFixed(2)}"
+                            data-items='${JSON.stringify(grupo.items)}'
+                            title="Mostrar ticket">
+                        Mostrar Ticket 🧾
+                    </button>
+                </div>
+                
+                <div id="area-ticket-${index}" class="area-ticket hidden mt-4 border border-stone-300 p-5 bg-white font-mono text-sm">
                 </div>
             </div>
         `).join('');
@@ -149,33 +152,41 @@ async function cargarMisPedidos() {
         // Agregar event listeners a los botones de ticket
         document.querySelectorAll('.ticket-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const pedidoId = btn.dataset.pedido;
-                const nombre = btn.dataset.nombre;
-                const precio = btn.dataset.precio;
-                const cantidad = btn.dataset.cantidad;
-                const usuario = btn.dataset.usuario;
-                console.log('Imprimiendo ticket...');
-                generarDatosDelTicket(pedidoId, nombre, precio, cantidad, usuario);
-
-                const areaTicket = document.getElementById('area-ticket');
+                const pedidoIndex = btn.dataset.pedidoIndex;
+                const pedidoNumero = btn.dataset.pedidoNumero;
+                const fecha = btn.dataset.fecha;
+                const total = btn.dataset.total;
+                const items = JSON.parse(btn.dataset.items);
+                
+                const areaTicket = document.getElementById(`area-ticket-${pedidoIndex}`);
+                
+                // Generar la lista de artículos
+                let itemsHTML = items.map(item => 
+                    `<li>${item.nombre} - ${item.cantidad} x $${parseFloat(item.precio).toFixed(2)} = $${(parseFloat(item.precio) * parseInt(item.cantidad)).toFixed(2)}</li>`
+                ).join('');
 
                 let contenidoHTML = `
-                    <h3>--- Recibo de Compra ---</h3>
-                    <p>ID Transacción: ${pedidoId}</p>
-                    <p>Fecha: ${new Date().toLocaleString()}</p>
-                    <p>Cliente: ${usuario}</p>
+                    <h3 style="text-align: center;">--- Recibo de Compra ---</h3>
+                    <p>Pedido #${pedidoNumero}</p>
+                    <p>Fecha: ${fecha}</p>
+                    <p>Cliente: ${usuarioActual || 'Usuario'}</p>
                     <p>-------------------------</p>
                     <h4>Artículos:</h4>
-                    <ul>
-                        <li>${nombre} - ${cantidad} @ $${parseFloat(precio).toFixed(2)}</li>
+                    <ul style="list-style: none; padding: 0;">
+                        ${itemsHTML}
                     </ul>
                     <p>-------------------------</p>
-                    <h4>Total: $${(parseFloat(precio) * parseInt(cantidad)).toFixed(2)}</h4>
-                    <h3>--- ¡Gracias por su compra! ---</h3>
+                    <h4>Total: $${total}</h4>
+                    <p style="text-align: center;">--- ¡Gracias por su compra! ---</p>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button onclick="window.print()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Imprimir 🖨️
+                        </button>
+                    </div>
                 `;
 
                 areaTicket.innerHTML = contenidoHTML;
-                areaTicket.style.display = 'block';
+                areaTicket.classList.remove('hidden');
             });
         });
 
