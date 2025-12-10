@@ -142,7 +142,7 @@ async function cargarMisPedidos() {
                             title="Mostrar ticket">
                         Mostrar Ticket 🧾
                     </button>
-                    <button onclick="imprimirTicket(${pedidoIndex})" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                    <button onclick="imprimirTicket(${index})" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                             Imprimir 🖨️
                         </button>
                 </div>
