@@ -179,7 +179,7 @@ async function cargarMisPedidos() {
                     <h4>Total: $${total}</h4>
                     <p style="text-align: center;">--- ¡Gracias por su compra! ---</p>
                     <div style="text-align: center; margin-top: 15px;">
-                        <button onclick="imprimirTicket()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                        <button onclick="imprimirTicket(${pedidoIndex})" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                             Imprimir 🖨️
                         </button>
                     </div>
@@ -218,9 +218,14 @@ function generarDatosDelTicket(i, i_n,i_p,i_c, i_u) {
     return datosDeCompra;
 }
 
-function imprimirTicket() {
-
-    const elementosAImprimir = document.getElementById('area-ticket');
+function imprimirTicket(pedidoIndex) {
+    const elementosAImprimir = document.getElementById(`area-ticket-${pedidoIndex}`);
+    
+    if (!elementosAImprimir) {
+        console.error('No se encontró el ticket para imprimir');
+        return;
+    }
+    
     const contenidoOriginal = document.body.innerHTML;
 
     document.body.innerHTML = elementosAImprimir.innerHTML;
@@ -229,6 +234,9 @@ function imprimirTicket() {
     window.print();
 
     document.body.innerHTML = contenidoOriginal;
+    
+    // Recargar para restaurar los event listeners
+    location.reload();
 }
 
 // Actualizar UI cuando hay sesión activa
