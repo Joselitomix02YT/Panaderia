@@ -135,9 +135,12 @@ async function cargarMisPedidos() {
                                 data-precio="${item.precio}"
                                 data-cantidad="${item.cantidad}"
                                 data-usuario="${usuarioActual}"
-                                title="Imprimir ticket">
-                            Imprimir Ticket🧾
+                                title="Mostrar ticket">
+                            Mostrar Ticket🧾
                         </button>
+                        <div id="area-ticket" style="display: none; border: 1px solid #ccc; padding: 20px; width: 300px; font-family: monospace;">
+                        
+                        </div>
                     `).join('')}
                 </div>
             </div>
@@ -153,6 +156,32 @@ async function cargarMisPedidos() {
                 const usuario = btn.dataset.usuario;
                 console.log('Imprimiendo ticket...');
                 generarDatosDelTicket(pedidoId, nombre, precio, cantidad, usuario);
+
+                const areaTicket = document.getElementById('area-ticket');
+
+                let contenidoHTML = `
+                    <h3>--- Recibo de Compra ---</h3>
+                    <p>ID Transacción: ${pedidoId}</p>
+                    <p>Fecha: ${new Date().toLocaleString()}</p>
+                    <p>Cliente: ${usuario}</p>
+                    <p>-------------------------</p>
+                    <h4>Artículos:</h4>
+                    <ul>
+                `;
+
+                datos.articulos.forEach(item => {
+                    contenidoHTML += `<li>${cantidad} @ $${parseFloat(precio).toFixed(2)}</li>`;
+                });
+
+                contenidoHTML += `
+                    </ul>
+                    <p>-------------------------</p>
+                    <h4>Total: $${(parseFloat(precio) * parseInt(cantidad)).toFixed(2)}</h4>
+                    <h3>--- ¡Gracias por su compra! ---</h3>
+                `;
+
+                areaTicket.innerHTML = contenidoHTML;
+                areaTicket.style.display = 'block';
             });
         });
 
