@@ -213,6 +213,11 @@ app.post('/api/usuario/agregar-fondos', async (req, res) => {
       return res.status(400).json({ error: 'Cantidad inválida' });
     }
 
+    if (cantidadNumerica > 999999999999) {
+      console.log('❌ Cantidad excede el límite');
+      return res.status(400).json({ error: 'La cantidad no puede ser mayor a 999,999,999,999' });
+    }
+
     console.log('🔄 Ejecutando UPDATE...');
     const [updateResult] = await pool.query(
       'UPDATE usuario SET fondos = fondos + ? WHERE id = ?',

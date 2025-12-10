@@ -132,7 +132,7 @@ async function cargarMisPedidos() {
                     `).join('')}
                 </div>
                 
-                <div class="mt-4 flex justify-end">
+                <div class="mt-4 flex justify-end gap-2">
                     <button class="ticket-btn px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors" 
                             data-pedido-index="${index}"
                             data-pedido-numero="${pedidosArray.length - index}"
@@ -142,9 +142,9 @@ async function cargarMisPedidos() {
                             title="Mostrar ticket">
                         Mostrar Ticket 🧾
                     </button>
-                    <button onclick="imprimirTicket(${index})" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                            Imprimir 🖨️
-                        </button>
+                    <button id="btn-imprimir-${index}" onclick="imprimirTicket(${index})" class="hidden px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                        Imprimir 🖨️
+                    </button>
                 </div>
                 
                 <div id="area-ticket-${index}" class="area-ticket hidden mt-4 border border-stone-300 p-5 bg-white font-mono text-sm">
@@ -162,6 +162,7 @@ async function cargarMisPedidos() {
                 const items = JSON.parse(btn.dataset.items);
                 
                 const areaTicket = document.getElementById(`area-ticket-${pedidoIndex}`);
+                const btnImprimir = document.getElementById(`btn-imprimir-${pedidoIndex}`);
                 
                 // Generar la lista de artículos
                 let itemsHTML = items.map(item => 
@@ -185,6 +186,11 @@ async function cargarMisPedidos() {
 
                 areaTicket.innerHTML = contenidoHTML;
                 areaTicket.classList.remove('hidden');
+                
+                // Mostrar el botón de imprimir
+                if (btnImprimir) {
+                    btnImprimir.classList.remove('hidden');
+                }
             });
         });
 
