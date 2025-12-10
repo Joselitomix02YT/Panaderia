@@ -366,8 +366,8 @@ document.getElementById('fondosForm')?.addEventListener('submit', async function
             
             // Actualizar fondos en la UI
             const fondosElement = document.querySelector('.text-lg.font-light.mb-2');
-            if (fondosElement) {
-                fondosElement.textContent = `Fondos disponibles: $${data.nuevosFondos.toFixed(2)} MXN`;
+            if (fondosElement && data.nuevosFondos !== undefined && data.nuevosFondos !== null) {
+                fondosElement.textContent = `Fondos disponibles: $${parseFloat(data.nuevosFondos).toFixed(2)} MXN`;
             }
             
             setTimeout(function() {
