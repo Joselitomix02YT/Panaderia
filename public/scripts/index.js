@@ -364,16 +364,10 @@ document.getElementById('fondosForm')?.addEventListener('submit', async function
             mensajeDiv.className = 'mb-4 p-3 rounded-lg bg-green-100 text-green-800 border border-green-300';
             document.getElementById('fondosForm').reset();
             
-            // Actualizar fondos en la UI
-            const fondosElement = document.querySelector('.text-lg.font-light.mb-2');
-            if (fondosElement && data.nuevosFondos !== undefined && data.nuevosFondos !== null) {
-                fondosElement.textContent = `Fondos disponibles: $${parseFloat(data.nuevosFondos).toFixed(2)} MXN`;
-            }
-            
+            // Recargar la página después de 1.5 segundos para mostrar los fondos actualizados
             setTimeout(function() {
-                document.getElementById('fondos-modal').classList.add('hidden');
-                mensajeDiv.classList.add('hidden');
-            }, 2000);
+                location.reload();
+            }, 1500);
         } else {
             mensajeDiv.className = 'mb-4 p-3 rounded-lg bg-red-100 text-red-800 border border-red-300';
         }

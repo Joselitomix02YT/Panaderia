@@ -226,6 +226,8 @@ app.post('/api/usuario/agregar-fondos', async (req, res) => {
       'SELECT fondos FROM usuario WHERE id = ?',
       [req.session.userId]
     );
+
+    
     
     console.log('   Nuevos fondos:', rows[0]?.fondos);
 
