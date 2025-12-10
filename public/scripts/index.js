@@ -167,13 +167,7 @@ async function cargarMisPedidos() {
                     <p>-------------------------</p>
                     <h4>Artículos:</h4>
                     <ul>
-                `;
-
-                datos.articulos.forEach(item => {
-                    contenidoHTML += `<li>${cantidad} @ $${parseFloat(precio).toFixed(2)}</li>`;
-                });
-
-                contenidoHTML += `
+                        <li>${nombre} - ${cantidad} @ $${parseFloat(precio).toFixed(2)}</li>
                     </ul>
                     <p>-------------------------</p>
                     <h4>Total: $${(parseFloat(precio) * parseInt(cantidad)).toFixed(2)}</h4>
