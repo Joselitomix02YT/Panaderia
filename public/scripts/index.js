@@ -238,7 +238,7 @@ function imprimirTicket(pedidoIndex) {
 }
 
 // Actualizar UI cuando hay sesión activa
-function actualizarUIConSesion(username, isAdmin) {
+async function actualizarUIConSesion(username, isAdmin) {
     const sesionContainer = document.getElementById('sesion-container');
     const sesionContainerMobile = document.getElementById('sesion-container-mobile');
     const loginContainer = document.getElementById('login-container');
@@ -270,6 +270,9 @@ function actualizarUIConSesion(username, isAdmin) {
     
     // Ocultar formulario de login
     if (loginContainer) {
+        // Obtener fondos de forma asíncrona
+        const fondos = await obtenerFondos();
+        
         loginContainer.innerHTML = `
             <div class="text-center">
                 <h3 class="text-2xl font-light mb-4">¡Bienvenido, ${username}!</h3>
@@ -277,11 +280,10 @@ function actualizarUIConSesion(username, isAdmin) {
                 <a href="#mis-pedidos" class="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-3">
                     📦 Ver Mis Pedidos
                 </a>
-                <script>const fondos = obtenerFondos()</script>
                 <div class="my-4 border-t border-stone-300" style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                    Fondos disponibles: ${fondos} MXN
+                    <p class="text-lg font-light mb-2">Fondos disponibles: $${fondos.toFixed(2)} MXN</p>
                     <button onclick="AgregarFondos()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                    Agregar Fondos
+                        Agregar Fondos
                     </button>
                 </div>
                 ${isAdmin ? '<a href="/index2.html" class="inline-block px-6 py-3 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors ml-3">Ir al Panel de Administración</a>' : ''}
