@@ -295,7 +295,7 @@ function actualizarUIConSesion(username, isAdmin) {
 
 async function obtenerFondos() {
     try {
-        const response = await fetch(`/api/producto/fondos`);
+        const response = await fetch(`/api/producto/:fondos`);
         const producto = await response.json();
         console.log(producto + "Hola");
         return producto;
