@@ -313,6 +313,82 @@ async function obtenerFondos() {
     }
 }
 
+// Función para abrir el modal de agregar fondos
+function AgregarFondos() {
+    document.getElementById('fondos-modal').classList.remove('hidden');
+}
+
+// Cerrar modal de fondos
+document.getElementById('cerrar-fondos')?.addEventListener('click', function() {
+    document.getElementById('fondos-modal').classList.add('hidden');
+    document.getElementById('fondosForm').reset();
+    document.getElementById('mensaje-fondos').classList.add('hidden');
+});
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('fondos-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.add('hidden');
+        document.getElementById('fondosForm').reset();
+        document.getElementById('mensaje-fondos').classList.add('hidden');
+    }
+});
+
+// Manejo del formulario de agregar fondos
+document.getElementById('fondosForm')?.addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    const cantidad = document.getElementById('cantidad-fondos').value;
+    const fondosButton = document.getElementById('fondosButton');
+    const mensajeDiv = document.getElementById('mensaje-fondos');
+    
+    fondosButton.disabled = true;
+    fondosButton.textContent = 'Procesando...';
+    fondosButton.classList.add('opacity-50', 'cursor-not-allowed');
+    mensajeDiv.classList.add('hidden');
+    
+    try {
+        const response = await fetch('/api/usuario/agregar-fondos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ cantidad: parseFloat(cantidad) })
+        });
+
+        const data = await response.json();
+        mensajeDiv.classList.remove('hidden');
+        mensajeDiv.textContent = data.mensaje || data.error || 'Ocurrió un error';
+        
+        if (response.ok) {
+            mensajeDiv.className = 'mb-4 p-3 rounded-lg bg-green-100 text-green-800 border border-green-300';
+            document.getElementById('fondosForm').reset();
+            
+            // Actualizar fondos en la UI
+            const fondosElement = document.querySelector('.text-lg.font-light.mb-2');
+            if (fondosElement) {
+                fondosElement.textContent = `Fondos disponibles: $${data.nuevosFondos.toFixed(2)} MXN`;
+            }
+            
+            setTimeout(function() {
+                document.getElementById('fondos-modal').classList.add('hidden');
+                mensajeDiv.classList.add('hidden');
+            }, 2000);
+        } else {
+            mensajeDiv.className = 'mb-4 p-3 rounded-lg bg-red-100 text-red-800 border border-red-300';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mensajeDiv.classList.remove('hidden');
+        mensajeDiv.className = 'mb-4 p-3 rounded-lg bg-red-100 text-red-800 border border-red-300';
+        mensajeDiv.textContent = 'Error al conectar con el servidor';
+    } finally {
+        fondosButton.disabled = false;
+        fondosButton.textContent = 'Agregar Fondos';
+        fondosButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+});
+
 // Función para cerrar sesión
 async function cerrarSesion() {
     if (!confirm('¿Estás seguro de cerrar sesión?')) {
@@ -828,3 +904,4 @@ document.getElementById('loginForm')?.addEventListener('submit', function(event)
 // Exponer funciones globalmente para que funcionen con onclick en HTML
 window.agregarAlCarrito = agregarAlCarrito;
 window.eliminarDelCarrito = eliminarDelCarrito;
+window.AgregarFondos = AgregarFondos;

@@ -190,6 +190,41 @@ app.get('/api/usuario/fondos', async (req, res) => {
   }
 });
 
+// Endpoint para agregar fondos
+app.post('/api/usuario/agregar-fondos', async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'No autenticado' });
+    }
+
+    const { cantidad } = req.body;
+    const cantidadNumerica = parseFloat(cantidad);
+
+    if (isNaN(cantidadNumerica) || cantidadNumerica <= 0) {
+      return res.status(400).json({ error: 'Cantidad inválida' });
+    }
+
+    await pool.query(
+      'UPDATE usuario SET fondos = fondos + ? WHERE id = ?',
+      [cantidadNumerica, req.session.userId]
+    );
+
+    const [rows] = await pool.query(
+      'SELECT fondos FROM usuario WHERE id = ?',
+      [req.session.userId]
+    );
+
+    res.json({ 
+      success: true, 
+      mensaje: 'Fondos agregados correctamente',
+      nuevosFondos: rows[0].fondos 
+    });
+  } catch (error) {
+    console.error('Error al agregar fondos:', error);
+    res.status(500).json({ error: 'Error al agregar fondos' });
+  }
+});
+
 // Servir archivos estáticos
 app.use(express.static('public'))
 
