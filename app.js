@@ -193,34 +193,51 @@ app.get('/api/usuario/fondos', async (req, res) => {
 // Endpoint para agregar fondos
 app.post('/api/usuario/agregar-fondos', async (req, res) => {
   try {
+    console.log('📝 Solicitud de agregar fondos recibida');
+    console.log('   Session userId:', req.session?.userId);
+    console.log('   Body:', req.body);
+    
     if (!req.session || !req.session.userId) {
+      console.log('❌ Usuario no autenticado');
       return res.status(401).json({ error: 'No autenticado' });
     }
 
     const { cantidad } = req.body;
     const cantidadNumerica = parseFloat(cantidad);
+    
+    console.log('   Cantidad recibida:', cantidad);
+    console.log('   Cantidad numérica:', cantidadNumerica);
 
     if (isNaN(cantidadNumerica) || cantidadNumerica <= 0) {
+      console.log('❌ Cantidad inválida');
       return res.status(400).json({ error: 'Cantidad inválida' });
     }
 
-    await pool.query(
+    console.log('🔄 Ejecutando UPDATE...');
+    const [updateResult] = await pool.query(
       'UPDATE usuario SET fondos = fondos + ? WHERE id = ?',
       [cantidadNumerica, req.session.userId]
     );
+    
+    console.log('   Filas afectadas:', updateResult.affectedRows);
+    console.log('   Changed rows:', updateResult.changedRows);
 
     const [rows] = await pool.query(
       'SELECT fondos FROM usuario WHERE id = ?',
       [req.session.userId]
     );
+    
+    console.log('   Nuevos fondos:', rows[0]?.fondos);
 
     res.json({ 
       success: true, 
       mensaje: 'Fondos agregados correctamente',
       nuevosFondos: rows[0].fondos 
     });
+    
+    console.log('✅ Fondos agregados exitosamente');
   } catch (error) {
-    console.error('Error al agregar fondos:', error);
+    console.error('❌ Error al agregar fondos:', error);
     res.status(500).json({ error: 'Error al agregar fondos' });
   }
 });
