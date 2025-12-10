@@ -295,12 +295,18 @@ function actualizarUIConSesion(username, isAdmin) {
 
 async function obtenerFondos() {
     try {
-        const response = await fetch(`/api/producto/:fondos`);
-        const producto = await response.json();
-        console.log(producto + "Hola");
-        return producto;
+        const response = await fetch('/api/usuario/fondos');
+        
+        if (!response.ok) {
+            throw new Error('Error al obtener fondos');
+        }
+        
+        const data = await response.json();
+        console.log('Fondos del usuario:', data.fondos);
+        return data.fondos;
     } catch (error) {
-        console.error('Error al obtener producto:', error);
+        console.error('Error al obtener fondos:', error);
+        return 0;
     }
 }
 

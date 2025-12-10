@@ -167,6 +167,29 @@ app.get('/api/sesion', (req, res) => {
   }
 })
 
+// Endpoint para obtener fondos del usuario actual
+app.get('/api/usuario/fondos', async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'No autenticado' });
+    }
+
+    const [rows] = await pool.query(
+      'SELECT fondos FROM usuario WHERE id = ?',
+      [req.session.userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({ fondos: rows[0].fondos || 0 });
+  } catch (error) {
+    console.error('Error al obtener fondos:', error);
+    res.status(500).json({ error: 'Error al obtener fondos' });
+  }
+});
+
 // Servir archivos estáticos
 app.use(express.static('public'))
 
